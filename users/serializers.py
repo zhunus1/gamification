@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Student, Staff
+from .models import User, Student, Lecturer, Practicer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -12,24 +12,25 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 class StudentSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
     class Meta:
         model = Student
         fields = (
             'user',
             'lecturer',
-            'teacher',
+            'practicer',
             'mbti',
             'english_level',
             'programming_exp'
         )
         extra_kwargs = {'password': {'write_only': True}}
 
-class StaffSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Staff
-        fields = ('__all__')
+    def create(self, validated_data):
+        user = User.objects.create(**validated_data['user'])
+        validated_data['user'] = user
+        student = Student.objects.create(**validated_data)
+        return student
 
 class AuthSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
-    

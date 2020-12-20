@@ -1,79 +1,88 @@
 from django.db import models
-from users.models import Student
+from users.models import Student, Lecturer, Practicer
 # Create your models here.
 
 
 class Variant(models.Model):
-    text = models.TextField()
+    title = models.CharField(max_length=255)
     is_correct = models.BooleanField()
 
 class Question(models.Model):
     question = models.TextField()
-    variants = models.ForeignKey(
-        'Variant',
-        on_delete=models.CASCADE,
+    variant = models.ManyToManyField(
+        Variant,
     )
     hint = models.TextField()
 
 class Coding(models.Model):
     question = models.TextField()
-    answer = models.CharField(max_length=255)
-    hint = models.TextField()
-
-class Example(models.Model):
-    input = models.CharField(max_length=255)
-    output = models.CharField(max_length=255)
+    note = models.TextField()
+    input_example = models.CharField(max_length=255)
+    output_example = models.CharField(max_length=255)
+    answer = models.TextField()
 
 class Filling(models.Model):
     question = models.TextField()
-    examples = models.OneToOneField(Example, on_delete=models.CASCADE, related_name='examples')
-    note = models.TextField()
+    description = models.TextField()
     answer = models.TextField()
 
 class Quiz(models.Model):
     grade = models.FloatField(default=0.0)
-    test = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='project')
+    question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='project')
     coding = models.OneToOneField(Coding, on_delete=models.CASCADE, related_name='project')
     filling = models.OneToOneField(Filling, on_delete=models.CASCADE, related_name='project')
 
 class Contest(models.Model):
     grade = models.FloatField(default=0.0)
-    codings = models.ForeignKey(
-        'Coding',
-        on_delete=models.CASCADE,
+    coding = models.ManyToManyField(
+        Coding,
     )
+
+class Attachement(models.Model):
+    attachement = models.FileField(upload_to ='attachements/')
 
 class Project(models.Model):
     grade = models.FloatField(default=0.0)
     description = models.TextField()
+    attachement = models.ManyToManyField(
+        Attachement,
+    )
 
 class Theory(models.Model):
     grade = models.FloatField(default=0.0)
     name = models.CharField(max_length=255)
-    questions = models.ForeignKey(
-        'Question',
-        on_delete=models.CASCADE,
+    question = models.ManyToManyField(
+        Question,
     )
     video_url = models.URLField(blank=True, null=True)
-    attachements = models.FileField(upload_to ='attachements/')
+    attachement = models.ManyToManyField(
+        Attachement,
+    )
 
 class Module(models.Model):
-    student = models.ForeignKey(
-        Student,
-        on_delete=models.CASCADE,
-    )
     name = models.CharField(max_length=255)
     module_progress = models.FloatField(default=0.0)
-    theory = models.ForeignKey(
-        'Theory',
+    theory = models.OneToOneField(
+        Theory,
         on_delete=models.CASCADE,
     )
-    quiz = models.ForeignKey(
-        'Quiz',
+    quiz = models.OneToOneField(
+        Quiz,
         on_delete=models.CASCADE,
     )
-    contest = models.ForeignKey(
-        'Contest',
+    contest = models.OneToOneField(
+        Contest,
         on_delete=models.CASCADE,
     )
     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='project')
+
+class Course(models.Model):
+    module = models.ManyToManyField(
+        Module,
+    )
+    lector = models.ManyToManyField(
+        Lecturer,
+    )
+    practicer = models.ManyToManyField(
+        Practicer,
+    )

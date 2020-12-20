@@ -3,64 +3,34 @@ import json
 from django.conf import settings
 from django.utils import timezone
 from rest_framework import exceptions, status
-from .serializers import UserSerializer,StudentSerializer,StaffSerializer,AuthSerializer
+from .serializers import UserSerializer,StudentSerializer,AuthSerializer
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
-from .models import User
+from .models import User,Student
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
 )
 from .authentication import GamificationAuthentication
+from rest_framework import generics
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
-
-class CreateUserAPIView(APIView):
-    # Registration of the platform User
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
-        data = request.data
-        serializer = UserSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-class CreateStudentAPIView(APIView):
-    # Registration of the Student
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
-        data = request.data
-        serializer = StudentSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
-class CreateStaffAPIView(APIView):
-    # Registration of the Staff
-    permission_classes = (AllowAny,)
-
-    def post(self, request):
-        data = request.data
-        serializer = StaffSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
-
+#Student Registration API
+class CreateStudentAPIView(generics.ListCreateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
 
 @api_view(['POST'])
-@permission_classes([AllowAny, ])
+@permission_classes([AllowAny,])
 def authenticate_user(request):
     try:
         serializer = AuthSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
-
-        user = User.objects.get(email=email, password=password)
+        user = get_object_or_404(User,email=email, password=password)
         if user:
             try:
                 token = GamificationAuthentication.get_token_from_credentials(user)

@@ -14,8 +14,8 @@ class User(AbstractBaseUser,PermissionsMixin):
     REQUIRED_FIELDS = ['first_name','last_name']
     avatar = models.ImageField(upload_to='avatars', blank=True, null=True)
 
-    is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True, blank=True, null=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -25,9 +25,12 @@ class User(AbstractBaseUser,PermissionsMixin):
     def __str__(self):
         return self.email
 
-class Staff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff', primary_key=True)
-    is_lecturer = models.BooleanField()
+class Lecturer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer', primary_key=True)
+
+class Practicer(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='practicer', primary_key=True)
+
 
 class Student(models.Model):
     ENGLISH_LEVEL = (
@@ -70,8 +73,13 @@ class Student(models.Model):
     )
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', primary_key=True)
 
-    staff = models.ForeignKey(
-        'Staff',
+    lecturer = models.ForeignKey(
+        Lecturer,
+        on_delete=models.CASCADE,
+    )
+
+    practicer = models.ForeignKey(
+        Practicer,
         on_delete=models.CASCADE,
     )
 
