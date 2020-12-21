@@ -6,6 +6,7 @@ from django.contrib.auth.models import (
 from .managers import UserManager
 
 class User(AbstractBaseUser,PermissionsMixin):
+    token = None
     email = models.EmailField(max_length=40, unique=True)
     password = models.CharField(max_length=255)
     first_name = models.CharField(max_length=255)
@@ -26,10 +27,25 @@ class User(AbstractBaseUser,PermissionsMixin):
         return self.email
 
 class Lecturer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='lecturer', primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
 class Practicer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='practicer', primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+
+class StudentQuiz(models.Model):
+    quiz = models.OneToOneField('course.Quiz', on_delete=models.CASCADE, primary_key=True)
+    grade = models.FloatField(default=0.0)
+    answer = models.IntegerField()
+
+class StudentContest(models.Model):
+    contest = models.OneToOneField('course.Contest', on_delete=models.CASCADE, primary_key=True)
+    grade = models.FloatField(default=0.0)
+    answer = models.TextField()
+
+class StudentProject(models.Model):
+    project = models.OneToOneField('course.Project', on_delete=models.CASCADE, primary_key=True)
+    grade = models.FloatField(default=0.0)
+    answer = models.TextField()
 
 
 class Student(models.Model):
@@ -82,6 +98,11 @@ class Student(models.Model):
         Practicer,
         on_delete=models.CASCADE,
     )
+
+    quizes = models.ForeignKey(StudentQuiz, on_delete=models.CASCADE)
+    projects = models.ForeignKey(StudentProject, on_delete=models.CASCADE)
+    contests = models.ForeignKey(StudentContest, on_delete=models.CASCADE)
+
 
     mbti = models.PositiveSmallIntegerField(choices=MBTI_TYPE)
     english_level = models.PositiveSmallIntegerField(choices=ENGLISH_LEVEL)

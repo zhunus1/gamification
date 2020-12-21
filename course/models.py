@@ -19,45 +19,32 @@ class Coding(models.Model):
     note = models.TextField()
     input_example = models.CharField(max_length=255)
     output_example = models.CharField(max_length=255)
-    answer = models.TextField()
 
 class Filling(models.Model):
     question = models.TextField()
     description = models.TextField()
-    answer = models.TextField()
 
 class Quiz(models.Model):
-    grade = models.FloatField(default=0.0)
     question = models.OneToOneField(Question, on_delete=models.CASCADE, related_name='project')
     coding = models.OneToOneField(Coding, on_delete=models.CASCADE, related_name='project')
     filling = models.OneToOneField(Filling, on_delete=models.CASCADE, related_name='project')
 
 class Contest(models.Model):
-    grade = models.FloatField(default=0.0)
     coding = models.ManyToManyField(
         Coding,
     )
 
-class Attachement(models.Model):
-    attachement = models.FileField(upload_to ='attachements/')
-
 class Project(models.Model):
-    grade = models.FloatField(default=0.0)
     description = models.TextField()
-    attachement = models.ManyToManyField(
-        Attachement,
-    )
+    attachement = models.FileField(upload_to ='attachements/',null=True,blank=True)
 
 class Theory(models.Model):
-    grade = models.FloatField(default=0.0)
     name = models.CharField(max_length=255)
     question = models.ManyToManyField(
         Question,
     )
     video_url = models.URLField(blank=True, null=True)
-    attachement = models.ManyToManyField(
-        Attachement,
-    )
+    attachement = models.FileField(upload_to ='attachements/',null=True,blank=True)
 
 class Module(models.Model):
     name = models.CharField(max_length=255)
@@ -72,11 +59,12 @@ class Module(models.Model):
     )
     contest = models.OneToOneField(
         Contest,
-        on_delete=models.CASCADE,
+        on_delete=models.CASCADE
     )
-    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='project')
+    project = models.OneToOneField(Project, on_delete=models.CASCADE)
 
 class Course(models.Model):
+    name = models.CharField(max_length=255)
     module = models.ManyToManyField(
         Module,
     )

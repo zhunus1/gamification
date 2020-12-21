@@ -43,3 +43,18 @@ class GamificationAuthentication(BaseAuthentication):
             return user,token
         except Exception:
             return None
+
+    def authenticate(self, request):
+        try:
+            auth = get_authorization_header(request).decode().split()
+
+            if not auth or auth[0] != GamificationAuthentication.TOKEN_PREFIX:
+                return None
+
+            user, token = GamificationAuthentication.get_credentials_from_token(auth[1])
+            user.token = token
+            if user is not None:
+                return user, auth[1]
+            return None
+        except Exception as e:
+            return None

@@ -31,6 +31,18 @@ class StudentSerializer(serializers.ModelSerializer):
         student = Student.objects.create(**validated_data)
         return student
 
+class LectorSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Lecturer
+        fields = ('user',)
+
+class PracticerSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    class Meta:
+        model = Practicer
+        fields = ('user',)
+
 class AuthSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField()
